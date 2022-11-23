@@ -6,7 +6,7 @@
 /*   By: gunjkim <gunjkim@student.42seoul.kr>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/21 19:57:09 by gunjkim           #+#    #+#             */
-/*   Updated: 2022/11/22 17:32:45 by gunjkim          ###   ########.fr       */
+/*   Updated: 2022/11/23 14:37:19 by gunjkim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,8 +32,10 @@ typedef struct s_buff
 
 char	*get_next_line(int fd);
 
-size_t	ft_strlen(const char *s);
+size_t	ft_strlen_c(const char *s, const char c);
 char	*ft_strchr(const char *s, int c);
 size_t	ft_strlcpy(char *dst, const char *src, size_t dstsize);
+char	*ft_strdup(const char *s1);
+size_t	ft_strlcat(char *dst, const char *src, size_t dstsize);
 
 #endif
