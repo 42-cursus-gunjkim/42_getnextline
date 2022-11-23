@@ -6,7 +6,7 @@
 /*   By: gunjkim <gunjkim@student.42seoul.kr>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/21 19:57:04 by gunjkim           #+#    #+#             */
-/*   Updated: 2022/11/23 20:39:17 by gunjkim          ###   ########.fr       */
+/*   Updated: 2022/11/23 21:17:28 by gunjkim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,13 +15,12 @@
 static char	*expand_line(t_buff *b, char *s)
 {
 	char	*line;
-	size_t	add_size;
 
 	line = (char *)malloc(sizeof(char) * (b->total_len + 1));
 	if (line == NULL)
 		return (NULL);
 	ft_strlcpy(line, s, b->total_len);
-	ft_strlcat(line, b->buff, b->total_len + 1);
+	ft_strlcat(line, b->buff + b->offset, b->total_len + 1);
 	free(s);
 	return (line);
 }
@@ -38,7 +37,6 @@ int	read_file(int fd, t_buff *b)
 
 static char	*make_next_line(int fd, t_buff *b)
 {
-	char	*line_tmp;
 	char	*line;
 	int		nbytes;
 
@@ -76,6 +74,7 @@ char	*get_next_line(int fd)
 	static t_buff	buffer;
 	char			*new_line;
 
+	buffer.total_len = 0;
 	new_line = make_next_line(fd, &buffer);
 	if (new_line == NULL)
 		return (NULL);
