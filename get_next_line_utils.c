@@ -6,7 +6,7 @@
 /*   By: gunjkim <gunjkim@student.42seoul.kr>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/21 19:56:58 by gunjkim           #+#    #+#             */
-/*   Updated: 2022/11/23 14:37:21 by gunjkim          ###   ########.fr       */
+/*   Updated: 2022/11/23 14:49:25 by gunjkim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,9 +32,8 @@ char	*ft_strchr(const char *s, int c)
 	c = (char)c;
 	while (i < len_with_null)
 	{
-		if (*s == c)
-			return (s);
-		s++;
+		if (s[i] == c)
+			return ((char *)(&s[i]));
 		i++;
 	}
 	return (NULL);
@@ -80,17 +79,20 @@ size_t	ft_strlcat(char *dst, const char *src, size_t dstsize)
 {
 	size_t	dst_len;
 	size_t	src_len;
+	size_t	i;
 
+	if (dst == NULL && dstsize == 0)
+		return (ft_strlen_c(src, '\0'));
+	i = 0;
 	dst_len = ft_strlen_c(dst, '\0');
-	src_len = ft_strlen(src, '\0');
+	src_len = ft_strlen_c(src, '\0');
 	if (dst_len >= dstsize)
 		return (src_len + dstsize);
-	while (dst_len + 1 < dstsize && src != '\0')
+	while (dst_len + i + 1 < dstsize && src[i] != '\0')
 	{
-		dst[dst_len] = *src;
-		dst_len++;
-		src++;
+		dst[dst_len + i] = src[i];
+		i++;
 	}
-	dst[dst_len] = '\0';
+	dst[dst_len + i] = '\0';
 	return (dst_len + src_len);
 }

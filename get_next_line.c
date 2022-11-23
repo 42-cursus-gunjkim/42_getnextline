@@ -6,50 +6,78 @@
 /*   By: gunjkim <gunjkim@student.42seoul.kr>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/21 19:57:04 by gunjkim           #+#    #+#             */
-/*   Updated: 2022/11/23 14:35:23 by gunjkim          ###   ########.fr       */
+/*   Updated: 2022/11/23 20:39:17 by gunjkim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-static char *make_next_line(int fd, t_buff *b)
+static char	*expand_line(t_buff *b, char *s)
 {
-	char	*next_line;
-	char	*next_line_tmp;
+	char	*line;
+	size_t	add_size;
 
-	next_line = ft_strdup("");
-	if (b->offset == 0)
+	line = (char *)malloc(sizeof(char) * (b->total_len + 1));
+	if (line == NULL)
+		return (NULL);
+	ft_strlcpy(line, s, b->total_len);
+	ft_strlcat(line, b->buff, b->total_len + 1);
+	free(s);
+	return (line);
+}
+
+int	read_file(int fd, t_buff *b)
+{
+	int	nbytes;
+
+	nbytes = read(fd, b->buff, BUFFER_SIZE);
+	b->buff[nbytes] = '\0';
+	b->offset = 0;
+	return (nbytes);
+}
+
+static char	*make_next_line(int fd, t_buff *b)
+{
+	char	*line_tmp;
+	char	*line;
+	int		nbytes;
+
+	line = ft_strdup("");
+	if (line == NULL)
+		return (NULL);
+	if (b->offset == 0 || b->offset >= BUFFER_SIZE)
 	{
-		read(fd, b->buff, BUFFER_SIZE - 1);
-		b->buff[BUFFER_SIZE - 1] = '\0';
-	}
-	while (ft_strchr(b->buff + b->offset, 10) == NULL)
-	{
-		b->total_len = b->total_len + ft_strlen_c(b->buff, '\0');
-		next_line_tmp = (char *)malloc(sizeof(char) *(b->total_len + 1));
-		ft_strlcpy(next_line_tmp, next_line, b->total_len + 1);
-		ft_strlcat(next_line_tmp, next_line, b->total_len + 1);
-		free(next_line);
-		next_line = next_line_tmp;
-		read(fd, b->buff, BUFFER_SIZE);
+		nbytes = read_file(fd, b);
+		if (nbytes == -1)
+			return (NULL);
 		b->offset = 0;
 	}
-	b->total_len = b->total_len + ft_strlen_c(b->buff + b->offset, '\n') + 1;
-	next_line_tmp = (char *)malloc(sizeof(char) *(b->total_len + 1));
-	ft_strlcpy(next_line_tmp, next_line, b->total_len + 1);
-	ft_strlcat(next_line_tmp, next_line, b->total_len + 1);
-	free(next_line);
-	next_line = next_line_tmp;
-	b->offset = ft_strlen_c(b->buff + b->offset, '\0') + 1;
-	return (next_line);
+	while (ft_strchr(b->buff + b->offset, '\n') == NULL)
+	{
+		b->total_len += ft_strlen_c(b->buff + b->offset, '\0');
+		line = expand_line(b, line);
+		nbytes = read_file(fd, b);
+		if (nbytes == -1)
+			return (NULL);
+		if (nbytes == 0)
+			break ;
+		b->offset = 0;
+	}
+	b->total_len += ft_strlen_c(b->buff + b->offset, '\n') + 1;
+	line = expand_line(b, line);
+	b->offset = b->offset + ft_strlen_c(b->buff + b->offset, '\n') + 1;
+	if (line == NULL)
+		return (NULL);
+	return (line);
 }
 
 char	*get_next_line(int fd)
 {
-	static t_buff	*buffer;
+	static t_buff	buffer;
+	char			*new_line;
 
-	buffer = (t_buff *)malloc(sizeof(t_buff));
-	if (buffer == NULL)
+	new_line = make_next_line(fd, &buffer);
+	if (new_line == NULL)
 		return (NULL);
-	return (make_next_line(fd, buffer));
+	return (new_line);
 }
