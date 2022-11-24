@@ -6,7 +6,7 @@
 /*   By: gunjkim <gunjkim@student.42seoul.kr>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/21 19:57:04 by gunjkim           #+#    #+#             */
-/*   Updated: 2022/11/23 21:17:28 by gunjkim          ###   ########.fr       */
+/*   Updated: 2022/11/24 12:55:50 by gunjkim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,57 +16,57 @@ static char	*expand_line(t_buff *b, char *s)
 {
 	char	*line;
 
+	if (ft_strchr(b->buff + b->offset, '\n') != NULL)
+		b->total_len += ft_strlen_c(b->buff + b->offset, '\n') + 1;
+	else
+		b->total_len += ft_strlen_c(b->buff + b->offset, '\0');
 	line = (char *)malloc(sizeof(char) * (b->total_len + 1));
 	if (line == NULL)
 		return (NULL);
 	ft_strlcpy(line, s, b->total_len);
 	ft_strlcat(line, b->buff + b->offset, b->total_len + 1);
 	free(s);
+	if (ft_strchr(b->buff + b->offset, '\n') != NULL)
+		b->offset += ft_strlen_c(b->buff + b->offset, '\n') + 1;
+	if (ft_strchr(b->buff + b->offset, '\n') == NULL && b->nbytes < BUFFER_SIZE)
+		b->offset = -1;
+	if (b->offset == BUFFER_SIZE)
+		b->offset = 0;
 	return (line);
 }
 
 int	read_file(int fd, t_buff *b)
 {
-	int	nbytes;
-
-	nbytes = read(fd, b->buff, BUFFER_SIZE);
-	b->buff[nbytes] = '\0';
+	b->nbytes = read(fd, b->buff, BUFFER_SIZE);
+	b->buff[b->nbytes] = '\0';
 	b->offset = 0;
-	return (nbytes);
+	return (b->nbytes);
 }
 
 static char	*make_next_line(int fd, t_buff *b)
 {
 	char	*line;
-	int		nbytes;
 
 	line = ft_strdup("");
 	if (line == NULL)
 		return (NULL);
-	if (b->offset == 0 || b->offset >= BUFFER_SIZE)
+	while (b->offset != -1)
 	{
-		nbytes = read_file(fd, b);
-		if (nbytes == -1)
-			return (NULL);
-		b->offset = 0;
-	}
-	while (ft_strchr(b->buff + b->offset, '\n') == NULL)
-	{
-		b->total_len += ft_strlen_c(b->buff + b->offset, '\0');
+		if (b->offset == 0)
+		{
+			read_file(fd, b);
+			if (b->nbytes <= 0)
+			{
+				free(line);
+				return (NULL);
+			}
+		}
 		line = expand_line(b, line);
-		nbytes = read_file(fd, b);
-		if (nbytes == -1)
-			return (NULL);
-		if (nbytes == 0)
-			break ;
-		b->offset = 0;
+		if (ft_strchr(line, '\n') != NULL || b->offset == -1)
+			return (line);
 	}
-	b->total_len += ft_strlen_c(b->buff + b->offset, '\n') + 1;
-	line = expand_line(b, line);
-	b->offset = b->offset + ft_strlen_c(b->buff + b->offset, '\n') + 1;
-	if (line == NULL)
-		return (NULL);
-	return (line);
+	free(line);
+	return (NULL);
 }
 
 char	*get_next_line(int fd)
