@@ -1,17 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.h                                    :+:      :+:    :+:   */
+/*   get_next_line_bonus.h                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: gunjkim <gunjkim@student.42seoul.kr>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/21 19:57:09 by gunjkim           #+#    #+#             */
-/*   Updated: 2022/11/24 18:09:56 by gunjkim          ###   ########.fr       */
+/*   Updated: 2022/11/24 16:32:20 by gunjkim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef GET_NEXT_LINE_H
-# define GET_NEXT_LINE_H
+#ifndef GET_NEXT_LINE_BONUS_H
+# define GET_NEXT_LINE_BONUS_H
 
 # ifndef BUFFER_SIZE
 #  define BUFFER_SIZE 42
@@ -24,6 +24,7 @@
 typedef struct s_buff
 {
 	char	buff[BUFFER_SIZE + 1];
+	int		offset;
 	int		nbytes;
 	size_t	total_len;
 }	t_buff;
