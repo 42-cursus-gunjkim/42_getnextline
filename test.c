@@ -5,5 +5,6 @@
 int main()
 {
 	int fd = open("test", O_RDONLY);
-	printf("%s\n", get_next_line(fd));
+	for (int i=0; i<12;i++)
+		printf("%s", get_next_line(fd));
 }
