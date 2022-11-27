@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: gunjkim <gunjkim@student.42seoul.kr>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/11/21 19:57:04 by gunjkim           #+#    #+#             */
-/*   Updated: 2022/11/24 18:13:40 by gunjkim          ###   ########.fr       */
+/*   Created: 2022/11/27 14:47:06 by gunjkim           #+#    #+#             */
+/*   Updated: 2022/11/27 15:07:41 by gunjkim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,11 +15,12 @@
 static char	*expand_line(t_buff *b, char *s)
 {
 	char	*line;
+	size_t	added;
 
-	if (ft_strchr(b->buff + b->offset, '\n') != NULL)
-		b->total_len += ft_strlen_c(b->buff + b->offset, '\n') + 1;
+	if (ft_strchr(b->buff, '\n') != NULL)
+		b->total_len += ft_strlen_c(b->buff, '\n') + 1;
 	else
-		b->total_len += ft_strlen_c(b->buff + b->offset, '\0');
+		b->total_len += ft_strlen_c(b->buff, '\0');
 	line = (char *)malloc(sizeof(char) * (b->total_len + 1));
 	if (line == NULL)
 	{
@@ -27,22 +28,11 @@ static char	*expand_line(t_buff *b, char *s)
 		return (NULL);
 	}
 	ft_strlcpy(line, s, b->total_len + 1);
-	ft_strlcat(line, b->buff + b->offset, b->total_len + 1);
-	b->offset += b->total_len - ft_strlen_c(s, '\0');
+	ft_strlcat(line, b->buff, b->total_len + 1);
+	added = ft_strlen_c(line, '\0') - ft_strlen_c(s, '\0');
+	ft_strlcpy(b->buff, b->buff + added, BUFFER_SIZE + 1);
 	free(s);
-	if (b->offset == b->nbytes && b->nbytes < BUFFER_SIZE)
-		b->offset = -1;
-	if (b->offset == BUFFER_SIZE)
-		b->offset = 0;
 	return (line);
-}
-
-int	read_file(int fd, t_buff *b)
-{
-	b->nbytes = read(fd, b->buff, BUFFER_SIZE);
-	b->buff[b->nbytes] = '\0';
-	b->offset = 0;
-	return (b->nbytes);
 }
 
 static char	*make_next_line(int fd, t_buff *b)
@@ -52,25 +42,26 @@ static char	*make_next_line(int fd, t_buff *b)
 	line = ft_strdup("");
 	if (line == NULL)
 		return (NULL);
-	while (b->offset != -1)
+	while (ft_strchr(line, '\n') == NULL)
 	{
-		if (b->offset == 0)
+		if (ft_strlen_c(b->buff, '\0') == 0)
 		{
-			read_file(fd, b);
+			b->nbytes = read(fd, b->buff, BUFFER_SIZE);
+			b->buff[b->nbytes] = '\0';
 			if (ft_strlen_c(line, '\0') > 0 && b->nbytes == 0)
 				return (line);
 			if (b->nbytes <= 0)
-				break ;
+			{
+				b->buff[0] = '\0';
+				free(line);
+				return (NULL);
+			}
 		}
 		line = expand_line(b, line);
 		if (line == NULL)
 			return (NULL);
-		if (ft_strchr(line, '\n') != NULL || b->offset == -1)
-			return (line);
 	}
-	b->offset = 0;
-	free(line);
-	return (NULL);
+	return (line);
 }
 
 char	*get_next_line(int fd)

@@ -6,7 +6,7 @@
 /*   By: gunjkim <gunjkim@student.42seoul.kr>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/21 19:57:04 by gunjkim           #+#    #+#             */
-/*   Updated: 2022/11/24 18:34:56 by gunjkim          ###   ########.fr       */
+/*   Updated: 2022/11/27 15:10:12 by gunjkim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,11 +42,12 @@ static char	*make_next_line(int fd, t_buff *b)
 	line = ft_strdup("");
 	if (line == NULL)
 		return (NULL);
-	while (ft_strchr(b->buff, '\n') == NULL)
+	while (ft_strchr(line, '\n') == NULL)
 	{
 		if (ft_strlen_c(b->buff, '\0') == 0)
 		{
 			b->nbytes = read(fd, b->buff, BUFFER_SIZE);
+			b->buff[b->nbytes] = '\0';
 			if (ft_strlen_c(line, '\0') > 0 && b->nbytes == 0)
 				return (line);
 			if (b->nbytes <= 0)
@@ -60,8 +61,6 @@ static char	*make_next_line(int fd, t_buff *b)
 		if (line == NULL)
 			return (NULL);
 	}
-	if (ft_strchr(line, '\n') == NULL)
-		line = expand_line(b, line);
 	return (line);
 }
 
