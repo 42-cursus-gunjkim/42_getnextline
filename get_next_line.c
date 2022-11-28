@@ -6,7 +6,7 @@
 /*   By: gunjkim <gunjkim@student.42seoul.kr>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/21 19:57:04 by gunjkim           #+#    #+#             */
-/*   Updated: 2022/11/28 00:32:49 by gunjkim          ###   ########.fr       */
+/*   Updated: 2022/11/28 15:02:39 by gunjkim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,26 @@ static char	*expand_line(t_buff *b, char *s)
 	return (line);
 }
 
-static char	*make_next_line(int fd, t_buff *b)
+static void	lst_del(t_node **head, int fd)
+{
+	t_node	*curr;
+	t_node	*tmp;
+
+	curr = *head;
+	if (curr -> fd == fd)
+	{
+		*head = curr->next;
+		free(curr);
+		return ;
+	}
+	while (curr->next->fd != fd)
+		curr = curr->next;
+	tmp = curr->next;
+	curr->next = tmp->next;
+	free(tmp);
+}
+
+static char	*make_next_line(t_node *head, int fd, t_buff *b)
 {
 	char	*line;
 
@@ -53,7 +72,7 @@ static char	*make_next_line(int fd, t_buff *b)
 				return (line);
 			if (b->nbytes <= 0)
 			{
-				b->offset = 0;
+				lst_del(&head, fd);
 				free(line);
 				return (NULL);
 			}
@@ -66,14 +85,53 @@ static char	*make_next_line(int fd, t_buff *b)
 	return (line);
 }
 
+static t_node	*search_insert(t_node **head,int fd)
+{
+	t_node	*new_node;
+	t_node	*tmp;
+
+	tmp = *head;
+	if (tmp == NULL)
+	{
+		new_node = (t_node *)malloc(sizeof(t_node));
+		if (new_node == NULL)
+			return (NULL);
+		new_node->fd = fd;
+		new_node->next = NULL;
+		new_node->buff.buff[0] = '\0';
+		new_node->buff.offset = 0;
+		*head = new_node;
+		return (new_node);
+	}
+	while (tmp->next == NULL)
+	{
+		if (tmp->fd == fd)
+			return (tmp);
+		tmp = tmp -> next;
+	}
+	new_node = (t_node *)malloc(sizeof(t_node));
+	if (new_node == NULL)
+		return (NULL);
+	new_node -> fd = fd;
+	new_node->next = NULL;
+	new_node->buff.buff[0] = '\0';
+	new_node->buff.offset = 0;
+	tmp -> next = new_node;
+	return (new_node);
+}
+
 char	*get_next_line(int fd)
 {
-	static t_buff	buffer[OPEN_MAX];
+	static t_node	*head;
+	t_node			*fd_node;
 	char			*new_line;
 
 	if (fd < 0)
 		return (NULL);
-	buffer[fd].total_len = 0;
-	new_line = make_next_line(fd, &buffer[fd]);
+	fd_node = search_insert(&head, fd);
+	if (fd_node == NULL)
+		return (NULL);
+	fd_node->buff.total_len = 0;
+	new_line = make_next_line(head, fd, &(fd_node->buff));
 	return (new_line);
 }
