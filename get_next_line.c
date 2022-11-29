@@ -6,7 +6,7 @@
 /*   By: gunjkim <gunjkim@student.42seoul.kr>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/21 19:57:04 by gunjkim           #+#    #+#             */
-/*   Updated: 2022/11/29 13:21:05 by gunjkim          ###   ########.fr       */
+/*   Updated: 2022/11/29 13:31:55 by gunjkim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ static char	*expand_line(t_buff *b, char *s)
 	ft_strlcat(line, b->buff + b->offset, b->total_len + 1);
 	added = b->total_len - ft_strlen_c(s, '\0');
 	b->offset += added;
-	if (b->offset == (unsigned long)b->nbytes)
+	if (b->offset == (size_t)b->nbytes)
 		b->offset = 0;
 	free(s);
 	return (line);
