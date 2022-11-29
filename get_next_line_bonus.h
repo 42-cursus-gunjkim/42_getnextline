@@ -6,7 +6,7 @@
 /*   By: gunjkim <gunjkim@student.42seoul.kr>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/21 19:57:09 by gunjkim           #+#    #+#             */
-/*   Updated: 2022/11/27 19:00:40 by gunjkim          ###   ########.fr       */
+/*   Updated: 2022/11/29 13:10:50 by gunjkim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@
 
 typedef struct s_buff
 {
+	int		fd;
 	char	buff[BUFFER_SIZE + 1];
 	ssize_t	nbytes;
 	size_t	offset;

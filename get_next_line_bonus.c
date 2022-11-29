@@ -6,7 +6,7 @@
 /*   By: gunjkim <gunjkim@student.42seoul.kr>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/27 14:47:06 by gunjkim           #+#    #+#             */
-/*   Updated: 2022/11/28 00:29:28 by gunjkim          ###   ########.fr       */
+/*   Updated: 2022/11/29 13:20:55 by gunjkim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,14 +66,43 @@ static char	*make_next_line(int fd, t_buff *b)
 	return (line);
 }
 
+static t_buff	*find_insert(t_buff *buff_arr, int fd)
+{
+	int	i;
+
+	i = 1;
+	while (i < OPEN_MAX)
+	{
+		if (buff_arr[i].fd == fd)
+			return (&buff_arr[i]);
+		if (buff_arr[i].fd == 0)
+			break ;
+		if (i == OPEN_MAX - 1)
+			return (NULL);
+		i++;
+	}
+	buff_arr[i].fd = fd;
+	return (&buff_arr[i]);
+}
+
 char	*get_next_line(int fd)
 {
-	static t_buff	buffer[OPEN_MAX];
+	static t_buff	buff_arr[OPEN_MAX];
 	char			*new_line;
+	t_buff			*fd_buffer;
 
+	fd_buffer = NULL;
 	if (fd < 0)
 		return (NULL);
-	buffer[fd].total_len = 0;
-	new_line = make_next_line(fd, &buffer[fd]);
+	if (fd != 0)
+	{
+		fd_buffer = find_insert(buff_arr, fd);
+		if (fd_buffer == NULL)
+			return (NULL);
+	}
+	else if (fd == 0)
+		fd_buffer = &buff_arr[0];
+	fd_buffer->total_len = 0;
+	new_line = make_next_line(fd, fd_buffer);
 	return (new_line);
 }
